@@ -120,40 +120,46 @@ func (b *Board) placeStone(p int, c Color) {
 			b.libs[b.find(q)]-- // decreasing libs of stones/chains neighbouring p
 		}
 	}
-	
+
 	opp := c.Opponent()
 	var enemyRoots []int
-	for _, q := range nb{
-		if b.points[q] == opp{
+	for _, q := range nb {
+		if b.points[q] == opp {
 			r := b.find(q)
-			if b.libs[r] == 0{
+			if b.libs[r] == 0 {
 				seen := false
 				// setting seen so we won't add the same root to enemyRoots
 				for _, er := range enemyRoots {
-					if er == r{
+					if er == r {
 						seen = true
 						break
 					}
 				}
-				if !seen{
+				if !seen {
 					enemyRoots.append(enemyRoots, r)
 				}
-			}	
+			}
 		}
 	}
-	for _, r := range enemyRoots{
-		b.removeChain(r, c)	
+	for _, r := range enemyRoots {
+		b.removeChain(r, c)
 	}
-		
-	
 
+	for _, q := range nb {
+		if b.points[q] == c {
+			b.union(p, q)
+		}
+	}
+}
+
+func (b *Board) removeChain(root int, friendly Color) {
+	dead := b.points[root]
+
+}
+
+type boardState struct {
 }
 
 func (b *Board) snapshot() {
-
-}
-
-func (b *Board) removeChain(root int, friendly Color){
-	dead := b.points[root]
 
 }
