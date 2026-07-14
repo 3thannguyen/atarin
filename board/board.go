@@ -124,7 +124,7 @@ func (b *Board) placeStone(p int, c Color) {
 	opp := c.Opponent()
 	var enemyRoots []int
 	for _, q := range nb{
-		if b.points[q] = opp{
+		if b.points[q] == opp{
 			r := b.find(q)
 			if b.libs[r] == 0{
 				seen := false
@@ -141,7 +141,7 @@ func (b *Board) placeStone(p int, c Color) {
 			}	
 		}
 	}
-	for _, r in := enemyRoots{
+	for _, r := range enemyRoots{
 		b.removeChain(r, c)	
 	}
 		
