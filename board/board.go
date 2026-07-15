@@ -90,10 +90,10 @@ func (b *Board) Play(p int, c Color) bool {
 	// create a snapshot (copy of board) to replay if illegal move
 	// downside is a lot of copies would be created
 	snap := b.snapshot()
-	b.placeStone(c, p)
+	b.placeStone(p, c)
 	// if liberty of a stone/chain is 0 (an eye = no liberty) then move is illegal
 	if b.libs[b.find(p)] == 0 {
-		restore(snap)
+		b.restore(snap)
 		return false
 	}
 	return true
@@ -136,7 +136,7 @@ func (b *Board) placeStone(p int, c Color) {
 					}
 				}
 				if !seen {
-					enemyRoots.append(enemyRoots, r)
+					enemyRoots = append(enemyRoots, r)
 				}
 			}
 		}
@@ -152,8 +152,45 @@ func (b *Board) placeStone(p int, c Color) {
 	}
 }
 
+// removing chains by flood-filling?
 func (b *Board) removeChain(root int, friendly Color) {
 	dead := b.points[root]
+	seen := map[int]bool{root: true}
+	stack := []int{root} // stack for tracking each member
+	var members []int
+	for len(stack) > 0 {
+		s := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		members = append(members, s)
+		var nb [4]int
+		b.neighbors(s, &nb)
+		// if a neighbor of a member is dead and not seen, add to stack to process
+		for _, q := range nb {
+			if b.points[q] == dead && !seen[q] {
+				seen[q] = true
+				stack = append(stack, q)
+			}
+		}
+	}
+
+	// after processing all dead members, we remove them and restore pseudo-liberty for friendly stones neighbors
+	for _, m := range members {
+		b.points[m] = emptyColor
+		b.parent[m] = 0
+		b.stones[m] = 0
+		b.libs[m] = 0
+	}
+
+	for _, m := range members {
+		var nb [4]int
+		b.neighbors(m, &nb)
+		for _, q := range nb {
+			// adding through root metadata
+			if b.points[q] == friendly {
+				b.libs[b.find(q)]++
+			}
+		}
+	}
 
 }
 
