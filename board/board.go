@@ -1,5 +1,7 @@
 package board
 
+import "strings"
+
 type Color int8 // int8 => 1-byte memory => full board ~100 bytes? => cache-friendly when calling playout
 
 const (
@@ -221,4 +223,24 @@ func (b *Board) restore(s boardState) {
 	copy(b.stones, s.stones)
 	copy(b.libs, s.libs)
 	b.hash = s.hash
+}
+
+// ASCII-lize the board position for testing (bro this is such a goated idea)
+// row 1 on top. we don't ascii-lize the borders
+func (b *Board) String() string {
+	var sb strings.Builder
+	for r := 1; r < b.Size-1; r++ {
+		for c := 1; c < b.Size-1; c++ {
+			switch b.points[b.Index(r, c)] {
+			case Black:
+				sb.WriteByte('X')
+			case White:
+				sb.WriteByte('O')
+			default:
+				sb.WriteByte('.')
+			}
+		}
+		sb.WriteByte('\n') // new line after done with row
+	}
+	return sb.String()
 }
