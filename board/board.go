@@ -5,7 +5,7 @@ import "strings"
 type Color int8 // int8 => 1-byte memory => full board ~100 bytes? => cache-friendly when calling playout
 
 const (
-	emptyColor = iota
+	Empty = iota
 	Black
 	White
 	Edge // secret fourth color of border so neighbor loops don't need to check for bounds
@@ -54,7 +54,7 @@ func New(size int) *Board {
 		koPoint: -1,
 	}
 
-	// filling all the board as an Edge first, then assigning emptyColor spaces after (easier)
+	// filling all the board as an Edge first, then assigning Empty spaces after (easier)
 	// + setting up union find for chaining
 	for i := range b.points {
 		b.points[i] = Edge
@@ -62,9 +62,10 @@ func New(size int) *Board {
 	}
 	for r := 1; r < size+1; r++ {
 		for c := 1; c < size+1; c++ { // wait... c++ HAHAHAHHAHAHAHAHHAHAH
-			b.points[r*(size+1)+c] = emptyColor
+			b.points[r*(size+1)+c] = Empty
 		}
 	}
+	b.history[b.hash] = true // the board itself is a seen position
 	return b
 }
 
@@ -85,7 +86,7 @@ func (b *Board) colorAt(row, col int) Color {
 
 // Play represents a turn, attempts to place stone at position p
 func (b *Board) Play(p int, c Color) bool {
-	if !c.isStone() || p < 0 || p > len(b.points) || c != emptyColor {
+	if !c.isStone() || p < 0 || p > len(b.points) || c != Empty {
 		return false
 	}
 
@@ -98,6 +99,12 @@ func (b *Board) Play(p int, c Color) bool {
 		b.restore(snap)
 		return false
 	}
+
+	if b.history[b.hash] { // superko check
+		b.restore(snap)
+		return false
+	}
+	b.history[b.hash] = true
 	return true
 }
 
@@ -108,10 +115,11 @@ func (b *Board) placeStone(p int, c Color) {
 	b.parent[p] = p
 	b.points[p] = c
 	b.stones[p] = 1
+	b.hash ^= zobristKeys[p][colorSlot(c)]
 
 	libs := 0
 	for _, q := range nb {
-		if b.points[q] == emptyColor {
+		if b.points[q] == Empty {
 			libs++
 		}
 	}
@@ -154,7 +162,7 @@ func (b *Board) placeStone(p int, c Color) {
 	}
 }
 
-// removing chains by flood-filling?
+// removing chains by flood-filling
 func (b *Board) removeChain(root int, friendly Color) {
 	dead := b.points[root]
 	seen := map[int]bool{root: true}
@@ -177,7 +185,8 @@ func (b *Board) removeChain(root int, friendly Color) {
 
 	// after processing all dead members, we remove them and restore pseudo-liberty for friendly stones neighbors
 	for _, m := range members {
-		b.points[m] = emptyColor
+		b.hash ^= zobristKeys[m][colorSlot(dead)]
+		b.points[m] = Empty
 		b.parent[m] = 0
 		b.stones[m] = 0
 		b.libs[m] = 0
@@ -194,35 +203,6 @@ func (b *Board) removeChain(root int, friendly Color) {
 		}
 	}
 
-}
-
-// keeping a boardState so that we can copy/undo
-type boardState struct {
-	points []Color
-	parent []int
-	stones []int
-	libs   []int
-	hash   uint64
-}
-
-// taking a snapshot of current board by adding onto a boardState struct
-func (b *Board) snapshot() boardState {
-	return boardState{
-		points: append([]Color(nil), b.points...),
-		parent: append([]int(nil), b.parent...),
-		stones: append([]int(nil), b.stones...),
-		libs:   append([]int(nil), b.libs...),
-		hash:   b.hash,
-	}
-}
-
-// restoring the current board to before the illegal play was made
-func (b *Board) restore(s boardState) {
-	copy(b.points, s.points)
-	copy(b.parent, s.parent)
-	copy(b.stones, s.stones)
-	copy(b.libs, s.libs)
-	b.hash = s.hash
 }
 
 // ASCII-lize the board position for testing (bro this is such a goated idea)
