@@ -1,8 +1,9 @@
 package mcts
 
 import (
-	"atarin/board"
 	"math/rand/v2"
+
+	"github.com/3thannguyen/atarin/board"
 )
 
 const maxPlayoutMoves = 300 // safety valve

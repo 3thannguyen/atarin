@@ -1,8 +1,9 @@
 package mcts
 
 import (
-	"atarin/board"
 	"math"
+
+	"github.com/3thannguyen/atarin/board"
 )
 
 type Node struct {
