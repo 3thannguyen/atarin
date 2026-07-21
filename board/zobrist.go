@@ -37,3 +37,13 @@ func colorSlot(c Color) int {
 		return 1
 	}
 }
+
+func (b *Board) recomputeHash() uint64 {
+	var h uint64
+	for p, c := range b.points {
+		if c.isStone() {
+			h ^= zobristKeys[p][colorSlot(c)]
+		}
+	}
+	return h
+}
