@@ -25,7 +25,7 @@ func (n *Node) selectChild() *Node {
 	var best *Node
 	bestScore := math.Inf(-1)
 	for _, ch := range n.children {
-		score := ch.wins/ch.visits + uctC + math.Sqrt(logN/ch.visits) // no neural network yet -> cannot use alphazero mcts
+		score := ch.wins/ch.visits + uctC*math.Sqrt(logN/ch.visits) // no neural network yet -> cannot use alphazero mcts
 		if score > bestScore {
 			bestScore, best = score, ch
 		}

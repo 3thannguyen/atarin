@@ -46,7 +46,7 @@ func Run(in io.Reader, out io.Writer, e *Engine) {
 			continue
 		}
 		fields := strings.Fields(line)
-		cmd, args := strings.ToLower(fields[0]), fields[:1]
+		cmd, args := strings.ToLower(fields[0]), fields[1:]
 
 		switch cmd {
 		case "protocol_version":
@@ -75,6 +75,7 @@ func Run(in io.Reader, out io.Writer, e *Engine) {
 				fail("illegal move")
 				continue
 			}
+			ok("")
 		// case "genmove":
 		case "quit":
 			ok("")
@@ -84,7 +85,7 @@ func Run(in io.Reader, out io.Writer, e *Engine) {
 		}
 	}
 	if err := sc.Err(); err != nil {
-		log.Fatalf("reading error", err)
+		log.Fatalf("reading error: %v", err)
 	}
 }
 

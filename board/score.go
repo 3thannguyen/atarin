@@ -93,7 +93,7 @@ func (b *Board) isSimplyEye(p int, c Color) bool {
 func (b *Board) CandidateMoves(c Color, buf []int) []int {
 	buf = buf[:0] // emptying the buffer array but keeping capacity
 	for r := 1; r <= b.Size; r++ {
-		base := r + (b.Size + 1)
+		base := r * (b.Size + 1)
 		for col := 1; col <= b.Size; col++ {
 			p := base + col
 			if b.points[p] == Empty && !b.isSimplyEye(p, c) {

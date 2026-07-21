@@ -86,7 +86,7 @@ func (b *Board) colorAt(row, col int) Color {
 
 // Play represents a turn, attempts to place stone at position p
 func (b *Board) Play(p int, c Color) bool {
-	if !c.isStone() || p < 0 || p > len(b.points) || c != Empty {
+	if !c.isStone() || p < 0 || p >= len(b.points) || b.points[p] != Empty {
 		return false
 	}
 
@@ -187,7 +187,7 @@ func (b *Board) removeChain(root int, friendly Color) {
 	for _, m := range members {
 		b.hash ^= zobristKeys[m][colorSlot(dead)]
 		b.points[m] = Empty
-		b.parent[m] = 0
+		b.parent[m] = m
 		b.stones[m] = 0
 		b.libs[m] = 0
 	}
@@ -209,7 +209,7 @@ func (b *Board) removeChain(root int, friendly Color) {
 // row 1 on top. we don't ascii-lize the borders
 func (b *Board) String() string {
 	var sb strings.Builder
-	for r := 1; r < b.Size-1; r++ {
+	for r := 1; r <= b.Size; r++ {
 		for c := 1; c < b.Size-1; c++ {
 			switch b.points[b.Index(r, c)] {
 			case Black:
