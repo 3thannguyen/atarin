@@ -104,4 +104,5 @@ func (b *Board) CandidateMoves(c Color, buf []int) []int {
 	return buf
 }
 
+// creating clone of cloneBoard to separate logic for search
 func (b *Board) Clone() *Board { return b.cloneBoard() }

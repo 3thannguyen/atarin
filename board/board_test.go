@@ -181,7 +181,7 @@ func TestRandomGameInvariants(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	for game := 0; game < 50; game++ {
 		b := New(9)
-		color := Black
+		var color Color = Black
 		passes := 0
 		for move := 0; move < 200 && passes < 2; move++ {
 			empties := make([]int, 0, 81)
