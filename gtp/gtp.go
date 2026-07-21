@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -26,6 +27,10 @@ type Engine struct {
 	komi    float64
 	budget  time.Duration
 	workers int
+}
+
+func NewEngine(budget time.Duration, workers int) *Engine {
+	return &Engine{board: board.New(9), komi: 7, budget: budget, workers: workers}
 }
 
 func Run(in io.Reader, out io.Writer, e *Engine) {
@@ -77,6 +82,9 @@ func Run(in io.Reader, out io.Writer, e *Engine) {
 		default:
 			fail("unknown command")
 		}
+	}
+	if err := sc.Err(); err != nil {
+		log.Fatalf("reading error", err)
 	}
 }
 
