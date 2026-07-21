@@ -103,3 +103,5 @@ func (b *Board) CandidateMoves(c Color, buf []int) []int {
 	}
 	return buf
 }
+
+func (b *Board) Clone() *Board { return b.cloneBoard() }
