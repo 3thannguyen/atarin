@@ -2,6 +2,7 @@ package mcts
 
 import (
 	"math/rand/v2"
+	"sync"
 	"time"
 
 	"github.com/3thannguyen/atarin/board"
@@ -75,4 +76,37 @@ func search(root *board.Board, toPlay board.Color, komi float64, deadline time.T
 		}
 	}
 	return rootNode
+}
+
+func Genmove(b *board.Board, toPlay board.Color, komi float64, budget time.Duration, workers int) int {
+	if workers < 1 {
+		workers = 1
+	}
+	deadline := time.Now().Add(budget)
+	roots := make([]*Node, workers)
+
+	var wg sync.WaitGroup
+	for w := 0; w < workers; w++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			rng := rand.New(rand.NewPCG(0xFAFAFA, uint64(id)+uint64(time.Now().UnixNano())))
+			roots[id] = search(b.Clone(), toPlay, komi, deadline, rng)
+		}(w)
+	}
+	wg.Wait()
+
+	totalVisits := map[int]float64{}
+	for _, r := range roots {
+		for _, ch := range r.children {
+			totalVisits[ch.move] += ch.visits
+		}
+	}
+	best, bestV := Pass, -1.0
+	for m, v := range totalVisits {
+		if v > bestV {
+			bestV, best = v, m
+		}
+	}
+	return best
 }
