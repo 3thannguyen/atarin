@@ -57,7 +57,7 @@ func Run(in io.Reader, out io.Writer, e *Engine) {
 			ok("0.1")
 		case "list_commands":
 			ok(strings.Join(known_commands, "\n"))
-		case "known_commands":
+		case "known_command":
 			known := "false"
 			for _, k := range known_commands {
 				if len(args) > 0 && args[0] == k {
@@ -68,16 +68,19 @@ func Run(in io.Reader, out io.Writer, e *Engine) {
 		case "komi":
 			if len(args) == 0 {
 				fail("komi needs an argument")
+				continue
 			}
 			k, err := strconv.ParseFloat(args[0], 64)
 			if err != nil {
 				fail("bad komi")
+				continue
 			}
 			e.komi = k
 			ok("")
 		case "boardsize":
 			if len(args) == 0 {
 				fail("boardsize requires an argument")
+				continue
 			}
 			n, err := strconv.Atoi(args[0])
 			if err != nil || n < 2 || n > 19 {
@@ -90,6 +93,11 @@ func Run(in io.Reader, out io.Writer, e *Engine) {
 			e.board = board.New(e.board.Size)
 			ok("")
 		case "play": // input would be "play B E5" -> black puts stone at e5
+			if len(args) < 2 {
+				fail("play needs both color and move args")
+				continue
+			}
+
 			c, cok := parseColor(args[0])
 			p, pok := e.vertextoPoint(args[1])
 			if !cok || !pok {
