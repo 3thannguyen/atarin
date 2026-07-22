@@ -53,7 +53,32 @@ func Run(in io.Reader, out io.Writer, e *Engine) {
 			ok("2")
 		case "name":
 			ok("atarin")
+		case "version":
+			ok("0.1")
+		case "list_commands":
+			ok(strings.Join(known_commands, "\n"))
+		case "known_commands":
+			known := "false"
+			for _, k := range known_commands {
+				if len(args) > 0 && args[0] == k {
+					known = "true"
+				}
+			}
+			ok(known)
+		case "komi":
+			if len(args) == 0 {
+				fail("komi needs an argument")
+			}
+			k, err := strconv.ParseFloat(args[0], 64)
+			if err != nil {
+				fail("bad komi")
+			}
+			e.komi = k
+			ok("")
 		case "boardsize":
+			if len(args) == 0 {
+				fail("boardsize requires an argument")
+			}
 			n, err := strconv.Atoi(args[0])
 			if err != nil || n < 2 || n > 19 {
 				fail("unacceptable size")
@@ -76,7 +101,24 @@ func Run(in io.Reader, out io.Writer, e *Engine) {
 				continue
 			}
 			ok("")
-		// case "genmove":
+		case "genmove":
+			if len(args) == 0 {
+				fail("genmove requires a color")
+				continue
+			}
+			c, cok := parseColor(args[0])
+			if !cok {
+				fail("invalid color")
+				continue
+			}
+			m := mcts.Genmove(e.board, c, e.komi, e.budget, e.workers)
+			if m != mcts.Pass && e.board.Play(m, c) {
+				ok(e.pointToVertex(m))
+			} else {
+				ok("pass")
+			}
+		case "showboard":
+			ok("\n" + e.board.String())
 		case "quit":
 			ok("")
 			return
