@@ -102,6 +102,9 @@ func Genmove(b *board.Board, toPlay board.Color, komi float64, budget time.Durat
 			totalVisits[ch.move] += ch.visits
 		}
 	}
+	// best move takes visits over winrate (since more visits suggest more robustness, 5900/10000 is better than 5/6)
+	// that said, for future improvements we can add a breaktie or filter by winrate, then take
+	// the highest winrate among the most visited nodes
 	best, bestV := Pass, -1.0
 	for m, v := range totalVisits {
 		if v > bestV {

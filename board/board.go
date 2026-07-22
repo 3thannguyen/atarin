@@ -5,7 +5,7 @@ import "strings"
 type Color int8 // int8 => 1-byte memory => full board ~100 bytes? => cache-friendly when calling playout
 
 const (
-	Empty = iota
+	Empty Color = iota
 	Black
 	White
 	Edge // secret fourth color of border so neighbor loops don't need to check for bounds
@@ -210,7 +210,7 @@ func (b *Board) removeChain(root int, friendly Color) {
 func (b *Board) String() string {
 	var sb strings.Builder
 	for r := 1; r <= b.Size; r++ {
-		for c := 1; c < b.Size-1; c++ {
+		for c := 1; c <= b.Size; c++ {
 			switch b.points[b.Index(r, c)] {
 			case Black:
 				sb.WriteByte('X')
