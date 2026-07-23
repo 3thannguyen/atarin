@@ -151,8 +151,9 @@ func (b *Board) placeStone(p int, c Color) {
 			}
 		}
 	}
+	captured := 0
 	for _, r := range enemyRoots {
-		b.removeChain(r, c)
+		captured += b.removeChain(r, c)
 	}
 
 	for _, q := range nb {
@@ -160,10 +161,24 @@ func (b *Board) placeStone(p int, c Color) {
 			b.union(p, q)
 		}
 	}
+
+	b.koPoint = -1
+	// simple ko iff stone placed is lone stone in atari and captured exactly one stone
+	if captured == 1 && b.stones[b.find(p)] == 1 && b.libs[b.find(p)] == 1 {
+		var nb [4]int
+		b.neighbors(p, &nb)
+		for _, q := range nb {
+			if b.points[q] == Empty {
+				// the only empty neighbor of p is going to be the koPoint
+				b.koPoint = q
+				break
+			}
+		}
+	}
 }
 
 // removing chains by flood-filling
-func (b *Board) removeChain(root int, friendly Color) {
+func (b *Board) removeChain(root int, friendly Color) int {
 	dead := b.points[root]
 	seen := map[int]bool{root: true}
 	stack := []int{root} // stack for tracking each member
@@ -202,7 +217,7 @@ func (b *Board) removeChain(root int, friendly Color) {
 			}
 		}
 	}
-
+	return len(members)
 }
 
 // ASCII-lize the board position for testing (bro this is such a goated idea)
